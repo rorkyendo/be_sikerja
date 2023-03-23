@@ -1,0 +1,34 @@
+Untuk mengakses data APInya menggunakan alamat
+http://127.0.0.1:5001/post
+Atau untuk mengatur port terdapat pada berkas index.py di baris 50.
+
+Penggunaannya adalah pada bagian body di POSTMAN
+
+{
+    "keyword": "programmer",
+    "taggar": "komputer_ti"
+    "tanggal_awal": "2022-08-28"
+    "tanggal_akhir": "2022-12-13"
+}
+
+dengan method "POST".
+
+Untuk bagian "keyword" dapat diisi sesuai kebutuhan, 
+jikalau tidak melakukan pencarian terhadap "keyword",
+cukup isikan dengan "".
+
+Untuk opsi kutip "taggar" itu sendiri terdapat 5, yaitu
+1. "komputer_ti"
+2. "manufaktur"
+3. "keuangan"
+4. "telekomunikasi"
+5. "ritel"
+
+Terdapat 7 isi data utama, yaitu 
+1. "detail_situs" -> Merupakan link situs lowongan secara detail
+2. "gaji" -> Informasi terkait gaji
+3. "job_desk" -> Deskripsi atau syarat lowongan
+4. "lowongan_pekerjaan" -> Judul utama lowongan yang sedang dicari
+5. "perusahaan_lokasi" -> Nama perusahaan dengan lokasi penempatan
+6. "sumber_situs" -> Sumber situs utama informasi terkait lowongan tersebut
+7. "tanggal_terbit" -> Tanggal lowongan ini dipublikasikan
