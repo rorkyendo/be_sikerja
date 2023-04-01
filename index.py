@@ -101,6 +101,7 @@ def testpost():
     df["nama_perusahaan"] = df["nama_perusahaan"].str.replace(r'\s+', ' ', regex=True)
     df["gaji"] = df["gaji"].str.replace(r'\s+', ' ', regex=True)
     df["job_desk"] = df["job_desk"].str.replace(r'\s+', ' ', regex=True)
+    df["kategori_awal"] = input_json['taggar']
     df=df.drop(["perusahaan_lokasi"],axis=1)
     df.to_excel("tes.xlsx")
     tanggal_awal = input_json['tanggal_awal']
@@ -117,12 +118,12 @@ def testpost():
     password="",
     database="sikerja"
 )
-        data=[df.iloc[i]["lowongan_pekerjaan"],df.iloc[i]["nama_perusahaan"],df.iloc[i]["job_desk"],input_json["kategori_awal"],df.iloc[i]["gaji"],df.iloc[i]["tanggal_terbit"],df.iloc[i]["sumber_situs"],"0"]
+        data=[df.iloc[i]["lowongan_pekerjaan"],df.iloc[i]["nama_perusahaan"],df.iloc[i]["job_desk"],df.iloc[i]["kategori_awal"],df.iloc[i]["gaji"],df.iloc[i]["tanggal_terbit"],df.iloc[i]["detail_situs"],"0"]
         table = "sk_loker"
         best_solution=harmony_search(conn, table, data)
         if best_solution==0:
             cursor=conn.cursor()
-            cursor.execute("UPDATE from sk_loker set status='LAMA' where kategori='"+input_json["kategori_awal"]+"'")
+            cursor.execute("UPDATE from sk_loker set status='LAMA' where kategori='"+df.iloc[i]["kategori_awal"]+"'")
             conn.commit()
             cursor.close()
             conn.close()
