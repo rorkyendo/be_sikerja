@@ -5,7 +5,6 @@ import json
 import mysql.connector
 import numpy as np
 
-
 # Pustaka Website Lowongan
 from website_lowongan.jobs_id import data_lowongan_jobsid
 from website_lowongan.glints import data_lowongan_glints
@@ -62,6 +61,13 @@ def harmony_search(conn, table, solution):
         return 0
     else:
         best_solution = min(harmony_memory, key=len)
+        
+        # Insert the best solution into the database
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO {} (nama_loker, perusahaan, deskripsi, kategori, gaji, tanggal, source, created_by, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table), (best_solution[0], best_solution[1], best_solution[2], best_solution[3], best_solution[4], best_solution[5], best_solution[6], best_solution[7], "BARU"))
+        conn.commit()
+        cursor.close()
+        
         return best_solution
 
 
@@ -100,12 +106,10 @@ def index():
 def testpost():
     input_json = request.get_json(force=True)
     
-    # dictToReturn = {
-    #     'hasil 1': input_json['text1'], 'hasil 2': input_json['text2']}
     dictToReturn = data_lowongan_jobsid(input_json['keyword'], input_json['taggar']) + data_lowongan_glints(input_json['keyword'], input_json['taggar']) + data_lowongan_jobstreet(
         input_json['keyword'], input_json['taggar']) + data_lowongan_karir(input_json['keyword'], input_json['taggar']) + data_lowongan_loker(input_json['keyword'], input_json['taggar'])
     df = pd.DataFrame(dictToReturn)
-    df = df.replace('\n',' ', regex=True)
+    df = df.replace('\n', ' ', regex=True)
     
     df['nama_perusahaan'] = df['perusahaan_lokasi'].str.encode('ascii', 'ignore').str.decode('ascii')
     df.columns = df.columns.str.strip()
@@ -113,67 +117,41 @@ def testpost():
     df["gaji"] = df["gaji"].str.replace(r'\s+', ' ', regex=True)
     df["job_desk"] = df["job_desk"].str.replace(r'\s+', ' ', regex=True)
     df["kategori_awal"] = input_json['taggar']
-    df=df.drop(["perusahaan_lokasi"],axis=1)
+    df = df.drop(["perusahaan_lokasi"], axis=1)
     df.to_excel("tes.xlsx")
     tanggal_awal = input_json['tanggal_awal']
     tanggal_akhir = input_json['tanggal_akhir']
-    df = df.query(
-        'tanggal_terbit >= @tanggal_awal and tanggal_terbit <= @tanggal_akhir')
+    df = df.query('tanggal_terbit >= @tanggal_awal and tanggal_terbit <= @tanggal_akhir')
     df.to_excel("filter.xlsx")
-    for i in range(len(df)):
-        if df.iloc[i]["lowongan_pekerjaan"]=="":
-            continue
-        conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="sikerja"
-)
-        data=[df.iloc[i]["lowongan_pekerjaan"],df.iloc[i]["nama_perusahaan"],df.iloc[i]["job_desk"],df.iloc[i]["kategori_awal"],df.iloc[i]["gaji"],df.iloc[i]["tanggal_terbit"],df.iloc[i]["detail_situs"],"0"]
-        table = "sk_loker"
-        best_solution=harmony_search(conn, table, data)
-        if best_solution==0:
-            cursor=conn.cursor()
-            cursor.execute("UPDATE from sk_loker set status='LAMA' where kategori='"+df.iloc[i]["kategori_awal"]+"'")
-            conn.commit()
-            cursor.close()
-            conn.close()
-            continue
-        else:
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO {} (nama_loker,perusahaan,deskripsi,kategori,gaji,tanggal,source,created_by,status) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)".format(table), (best_solution[0],best_solution[1],best_solution[2],best_solution[3],best_solution[4],best_solution[5],best_solution[6],best_solution[7],"BARU",))
-            conn.commit()
-            cursor.close()
-            conn.close()
-
-    hasil_konversi = df.to_json(orient="records")
-    data_json = json.loads(hasil_konversi)
     
-    return data_json
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="sikerja"
+    )
+    
+    cursor = conn.cursor()
+    for i in range(len(df)):
+        if df.iloc[i]["lowongan_pekerjaan"] == "":
+            continue
+        
+        data = [df.iloc[i]["lowongan_pekerjaan"], df.iloc[i]["nama_perusahaan"], df.iloc[i]["job_desk"], df.iloc[i]["kategori_awal"], df.iloc[i]["gaji"], df.iloc[i]["tanggal_terbit"], df.iloc[i]["detail_situs"], "0"]
+        table = "sk_loker"
+        solution = [random.randint(32, 126) for _ in range(8)]  # Contoh solusi acak
+        best_solution = harmony_search(conn, table, solution)
+        if best_solution == 0:
+            continue
+        
+        for idx, item in enumerate(data):
+            data[idx] = str(item).replace('\n', ' ')
+        cursor.execute("INSERT INTO {} (nama_loker, perusahaan, deskripsi, kategori, gaji, tanggal, source, created_by, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table), (data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], "BARU"))
+        conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify(dictToReturn)
 
 
-@app.route("/search")
-def search():
-    # app.config["CACHE_TYPE"] = "null"
-    db = {}
-
-    keyword = request.args.get("keyword")
-    taggar = request.args.get("taggar")
-    if keyword == None or keyword == '':
-        if taggar == None:
-            return redirect("/")
-
-    if keyword in db:
-        jobs = db[keyword]
-    else:
-        jobs = data_lowongan_jobsid(keyword, taggar) + data_lowongan_glints(keyword, taggar) + data_lowongan_jobstreet(
-            keyword, taggar) + data_lowongan_karir(keyword, taggar) + data_lowongan_loker(keyword, taggar)
-        # jobs = data_lowongan_loker(keyword, taggar)
-        print(jobs)
-
-        db[keyword] = jobs
-
-    return render_template("cari.html", kata_kunci=keyword, jobs=jobs)
-
-
-app.run(debug=True, threaded=True, port=5001)
+if __name__ == '__main__':
+    app.run(port=8080, debug=True)
