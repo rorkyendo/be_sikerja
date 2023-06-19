@@ -17,52 +17,52 @@ app = Flask("Lowongan Pekerjaan")
 import random
 
 def harmony_search(conn, table, solution):
-    # Define the range of values for each dimension of the solution
+    # Menentukan rentang nilai untuk setiap dimensi solusi
     lower_bound = 32
     upper_bound = 126
-    # Define the size of the harmony memory
+    # Menentukan ukuran memori harmoni
     memory_size = 50
-    # Define the maximum number of iterations
+    # Menentukan jumlah maksimum iterasi
     max_iter = 50
     
-    # Initialize the harmony memory
+    # Menginisialisasi memori harmoni
     harmony_memory = []
     for i in range(memory_size):
-        # Generate a random string
+        # Menghasilkan string acak
         new_solution = generate_random_solution(lower_bound, upper_bound)
         
-        # Check if the solution already exists in the database
+        # Memeriksa apakah solusi sudah ada dalam database
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM {} WHERE nama_loker=%s AND perusahaan=%s".format(table), (new_solution[0], new_solution[1],))
         if cursor.fetchone()[0] == 0:
-            # If the solution does not exist, add it to the harmony memory
+            # Jika solusi belum ada, tambahkan ke memori harmoni
             harmony_memory.append(new_solution)
         cursor.close()
     
-    # Iterate until the maximum number of iterations is reached
+    # Melakukan iterasi hingga mencapai jumlah maksimum iterasi
     for iteration in range(max_iter):
-        # Generate a new candidate solution
+        # Menghasilkan solusi kandidat baru
         new_solution = generate_new_solution(harmony_memory, lower_bound, upper_bound)
         
-        # Check if the solution already exists in the database
+        # Memeriksa apakah solusi sudah ada dalam database
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM {} WHERE nama_loker=%s AND perusahaan=%s".format(table), (new_solution[0], new_solution[1],))
         if cursor.fetchone()[0] == 0:
-            # If the solution does not exist, add it to the harmony memory
+            # Jika solusi belum ada, tambahkan ke memori harmoni
             harmony_memory.append(new_solution)
-            # Remove the worst solution from the harmony memory
+            # Menghapus solusi terburuk dari memori harmoni
             if len(harmony_memory) > memory_size:
                 worst_index = harmony_memory.index(max(harmony_memory, key=len))
                 harmony_memory.pop(worst_index)
         cursor.close()
     
-    # Insert the best solution into the database
+    # Memasukkan solusi terbaik ke dalam database
     if len(harmony_memory) == 0:
         return 0
     else:
         best_solution = min(harmony_memory, key=len)
         
-        # Insert the best solution into the database
+        # Memasukkan solusi terbaik ke dalam database
         cursor = conn.cursor()
         cursor.execute("INSERT INTO {} (nama_loker, perusahaan, deskripsi, kategori, gaji, tanggal, source, created_by, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table), (best_solution[0], best_solution[1], best_solution[2], best_solution[3], best_solution[4], best_solution[5], best_solution[6], best_solution[7], "BARU"))
         conn.commit()
@@ -87,11 +87,11 @@ def generate_new_solution(harmony_memory, lower_bound, upper_bound, hmcr=0.9):
     new_solution = []
     for i in range(len(harmony_memory[0])):
         if random.random() < hmcr:
-            # Select a random value from the harmony memory
+            # Memilih nilai acak dari memori harmoni
             random_index = random.randint(0, len(harmony_memory) - 1)
             value = harmony_memory[random_index][i]
         else:
-            # Generate a random value within the range
+            # Menghasilkan nilai acak dalam rentang
             value = random.randint(lower_bound, upper_bound)
         new_solution.append(value)
     return new_solution
@@ -138,20 +138,22 @@ def testpost():
         
         data = [df.iloc[i]["lowongan_pekerjaan"], df.iloc[i]["nama_perusahaan"], df.iloc[i]["job_desk"], df.iloc[i]["kategori_awal"], df.iloc[i]["gaji"], df.iloc[i]["tanggal_terbit"], df.iloc[i]["detail_situs"], "0"]
         table = "sk_loker"
-        solution = [random.randint(32, 126) for _ in range(8)]  # Contoh solusi acak
+        solution = [random.randint(32, 126), random.randint(32, 126), random.randint(32, 126), random.randint(32, 126), random.randint(32, 126), random.randint(32, 126), random.randint(32, 126), random.randint(32, 126)]
+        
         best_solution = harmony_search(conn, table, solution)
         if best_solution == 0:
             continue
         
-        for idx, item in enumerate(data):
-            data[idx] = str(item).replace('\n', ' ')
+        data.append(best_solution)
+        
         cursor.execute("INSERT INTO {} (nama_loker, perusahaan, deskripsi, kategori, gaji, tanggal, source, created_by, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(table), (data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], "BARU"))
         conn.commit()
+    
     cursor.close()
     conn.close()
     
-    return jsonify(dictToReturn)
+    return jsonify({"status": "success"})
 
 
-if __name__ == '__main__':
-    app.run(port=8080, debug=True)
+if __name__ == "__main__":
+    app.run(port=8000, debug=True)
