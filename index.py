@@ -15,7 +15,9 @@ from website_lowongan.loker import data_lowongan_loker
 
 app = Flask("Lowongan Pekerjaan")
 
-def harmony_search(conn, table,solution):
+import random
+
+def harmony_search(conn, table, solution):
     # Define the range of values for each dimension of the solution
     lower_bound = 32
     upper_bound = 126
@@ -27,41 +29,25 @@ def harmony_search(conn, table,solution):
     # Initialize the harmony memory
     harmony_memory = []
     for i in range(memory_size):
-        
         # Generate a random string
-        nama_loker = solution[0]
-        perusahaan = solution[1]
-        deskripsi = solution[2]
-        kategori = solution[3]
-        gaji = solution[4]
-        tanggal=solution[5]
-        source=solution[6]
-        created_by=solution[7]
-
-
-        # Check if the string already exists in the database
+        new_solution = generate_random_solution(lower_bound, upper_bound)
+        
+        # Check if the solution already exists in the database
         cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM {} WHERE nama_loker=%s and perusahaan=%s".format(table), (nama_loker,perusahaan,))
+        cursor.execute("SELECT COUNT(*) FROM {} WHERE nama_loker=%s AND perusahaan=%s".format(table), (new_solution[0], new_solution[1],))
         if cursor.fetchone()[0] == 0:
-            # If the string does not exist, add it to the harmony memory
-            harmony_memory.append(solution)
+            # If the solution does not exist, add it to the harmony memory
+            harmony_memory.append(new_solution)
         cursor.close()
     
     # Iterate until the maximum number of iterations is reached
     for iteration in range(max_iter):
         # Generate a new candidate solution
-        new_solution = solution
-        nama_loker = new_solution[0]
-        perusahaan = new_solution[1]
-        deskripsi = new_solution[2]
-        kategori = new_solution[3]
-        gaji = new_solution[4]
-        tanggal=new_solution[5]
-        source=new_solution[6]
-        created_by=new_solution[7]
+        new_solution = generate_new_solution(harmony_memory, lower_bound, upper_bound)
+        
         # Check if the solution already exists in the database
         cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM {} WHERE nama_loker=%s and perusahaan=%s".format(table), (nama_loker,perusahaan,))
+        cursor.execute("SELECT COUNT(*) FROM {} WHERE nama_loker=%s AND perusahaan=%s".format(table), (new_solution[0], new_solution[1],))
         if cursor.fetchone()[0] == 0:
             # If the solution does not exist, add it to the harmony memory
             harmony_memory.append(new_solution)
@@ -72,13 +58,38 @@ def harmony_search(conn, table,solution):
         cursor.close()
     
     # Insert the best solution into the database
-    if len(harmony_memory)==0:
+    if len(harmony_memory) == 0:
         return 0
     else:
         best_solution = min(harmony_memory, key=len)
         return best_solution
 
-# Run the Harmony Search algorithm to insert a string into the database
+
+def generate_random_solution(lower_bound, upper_bound):
+    nama_loker = random.randint(lower_bound, upper_bound)
+    perusahaan = random.randint(lower_bound, upper_bound)
+    deskripsi = random.randint(lower_bound, upper_bound)
+    kategori = random.randint(lower_bound, upper_bound)
+    gaji = random.randint(lower_bound, upper_bound)
+    tanggal = random.randint(lower_bound, upper_bound)
+    source = random.randint(lower_bound, upper_bound)
+    created_by = random.randint(lower_bound, upper_bound)
+    return [nama_loker, perusahaan, deskripsi, kategori, gaji, tanggal, source, created_by]
+
+
+def generate_new_solution(harmony_memory, lower_bound, upper_bound, hmcr=0.9):
+    new_solution = []
+    for i in range(len(harmony_memory[0])):
+        if random.random() < hmcr:
+            # Select a random value from the harmony memory
+            random_index = random.randint(0, len(harmony_memory) - 1)
+            value = harmony_memory[random_index][i]
+        else:
+            # Generate a random value within the range
+            value = random.randint(lower_bound, upper_bound)
+        new_solution.append(value)
+    return new_solution
+
 
 @app.route("/")
 def index():
