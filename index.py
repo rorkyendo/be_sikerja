@@ -109,26 +109,26 @@ def harmony_search(conn, table, hmcr, par, input_json):
     else:
         best_solution = min(harmony_memory, key=len)
         print(best_solution)
-        # nama_loker = best_solution[0]
-        # perusahaan = best_solution[1]
-        # tanggal = best_solution[5]
+        nama_loker = best_solution[0]
+        perusahaan = best_solution[1]
+        tanggal = best_solution[5]
 
-        # cursor = conn.cursor()
-        # cursor.execute("SELECT COUNT(*) FROM {} WHERE nama_loker=%s AND perusahaan=%s AND tanggal=%s".format(table),(nama_loker, perusahaan, tanggal))
-        # count = cursor.fetchone()[0]
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM {} WHERE nama_loker=%s AND perusahaan=%s AND tanggal=%s".format(table),(nama_loker, perusahaan, tanggal))
+        count = cursor.fetchone()[0]
 
-        # if count == 0:  # Data is new, insert it
-        #     cursor.execute(
-        #         "INSERT INTO {} (nama_loker, perusahaan, deskripsi, kategori, gaji, tanggal, source, created_by, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(
-        #             table), tuple(data + ["BARU"]))
-        #     conn.commit()
-        # else:  # Data already exists, update the status to "LAMA"
-        #     cursor.execute(
-        #         "UPDATE {} SET status='LAMA' WHERE nama_loker=%s AND perusahaan=%s AND tanggal=%s".format(table),
-        #         (nama_loker, perusahaan, tanggal))
-        #     conn.commit()
+        if count == 0:  # Data is new, insert it
+            cursor.execute(
+                "INSERT INTO {} (nama_loker, perusahaan, deskripsi, kategori, gaji, tanggal, source, created_by, status) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)".format(
+                    table), tuple(data + ["BARU"]))
+            conn.commit()
+        else:  # Data already exists, update the status to "LAMA"
+            cursor.execute(
+                "UPDATE {} SET status='LAMA' WHERE nama_loker=%s AND perusahaan=%s AND tanggal=%s".format(table),
+                (nama_loker, perusahaan, tanggal))
+            conn.commit()
 
-        # cursor.close()
+        cursor.close()
 
         return best_solution
 
