@@ -1,8 +1,5 @@
 from requests import get
-from urllib import request
 import bs4 as bs
-import lxml
-import re
 import json
 from datetime import datetime
 

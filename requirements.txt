@@ -1,6 +1,0 @@
-requests
-urllib3
-beautifulsoup4
-lxml
-flask
-re

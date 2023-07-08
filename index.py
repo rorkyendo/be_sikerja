@@ -2,9 +2,7 @@ from flask import Flask, render_template, request, redirect, send_file, session,
 import pandas as pd
 import json
 import mysql.connector
-import numpy as np
 import random
-import datetime
 
 # Pustaka Website Lowongan
 from website_lowongan.jobs_id import data_lowongan_jobsid

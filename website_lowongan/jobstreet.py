@@ -1,8 +1,6 @@
 # Pustaka
 from requests import get
 import bs4 as bs
-import lxml
-import re
 
 
 def data_lowongan_jobstreet(kata_kunci, taggar):

@@ -1,7 +1,5 @@
-# Pustaka
 from requests import get
 import bs4 as bs
-import lxml
 import re
 import json
 from datetime import datetime
