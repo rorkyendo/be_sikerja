@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+  <title>Aplikasi Pencari Lowongan Pekerjaan || Total Lowongan</title>
+</head>
+
+<body>
+  <main class="container">
+    <hgroup>
+      <h1>Hasil Lowongan "{{keyword}}, {{ taggar }}":</h1>
+    </hgroup>
+    <table role="grid">
+      <thead>
+        <tr>
+          <th>Posisi</th>
+          <th>Perusahaan dan Lokasi</th>
+          <th>Gaji</th>
+          <th>Tanggal</th>
+          <th>Kategori</th>
+          <th>Detail Situs</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- <?php for (i = 0; i <= satu_lowongan; i++){  ?> -->
+        {% for satu_lowongan in jobs %}
+        <tr>
+          <!-- <?php echo satu_lowongan.lowongan_pekerjaan; ?> -->
+          <td>{{satu_lowongan.nama_loker}}</td>
+          <td>{{satu_lowongan.perusahaan}}</td>
+          <td>{{satu_lowongan.gaji}}</td>
+          <td>{{satu_lowongan.tanggal}}</td>
+          <td>{{satu_lowongan.kategori}}</td>
+          <td><a href="{{satu_lowongan.source}}" target="_blank">Menuju ke Situs &rarr;</a></td>
+        </tr>
+        <!-- <?php } ?> -->
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+</body>
+
+</html>
