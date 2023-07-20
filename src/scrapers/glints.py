@@ -82,7 +82,8 @@ def data_lowongan_glints(kata_kunci, taggar):
                 # Tidak ada error
                 # Mencari Informasi Perusahaan
                 # print(response.text)
-
+                
+        print("Glints: ", glints)
         print('Kata kunci: '+kata_kunci)
         if taggar is not None:
             print('Taggar: '+taggar)

@@ -79,7 +79,8 @@ def data_lowongan_loker(kata_kunci, taggar):
                 # Tidak ada error
                 # Mencari Informasi Perusahaan
                 # print(response.text)
-
+        
+        print("Loker:", loker)
         print('Kata kunci: '+kata_kunci)
         if taggar is not None:
             print('Taggar: '+taggar)

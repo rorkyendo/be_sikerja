@@ -77,7 +77,7 @@ def data_lowongan_jobstreet(kata_kunci, taggar):
                 # Tidak ada error
                 # Mencari Informasi Perusahaan
                 # print(response.text)
-
+        print("Jobsteet:", jobstreet)
         print('Kata kunci: '+kata_kunci)
         if taggar is not None:
             print('Taggar: '+taggar)
