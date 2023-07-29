@@ -1,4 +1,4 @@
 DB_HOST="localhost"
-DB_USER="sikerja"
-DB_PASSWORD="sikerja"
+DB_USER="root"
+DB_PASSWORD=""
 DB_NAME="sikerja"

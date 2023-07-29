@@ -1,5 +1,9 @@
+# Pustaka
+# Pustaka
 from requests import get
 import bs4 as bs
+import lxml
+import re
 from datetime import datetime
 import json
 
@@ -17,7 +21,7 @@ def data_lowongan_karir(kata_kunci, taggar):
             if taggar == 'komputer_ti':
                 yang_dicari = kata_kunci
                 karir = 'https://www.karir.com/search?q='+yang_dicari + \
-                    '&sort_order=newest&industry_ids=-6&context=welcome_main_favorite_industry_item'
+                    '&sort_order=newest&job_function_ids=-91-94-47-92-46-93-45&industry_ids=-6&context=welcome_main_favorite_industry_item'
                 page = get(f"{karir}", headers={
                     "User-Agent": "Mozilla/5.0"}).content
             elif taggar == 'manufaktur':
@@ -45,9 +49,11 @@ def data_lowongan_karir(kata_kunci, taggar):
                 page = get(f"{karir}", headers={
                     "User-Agent": "Mozilla/5.0"}).content
         elif kata_kunci == '' and taggar is not None:
+            print("tag:")
+            print(taggar)
             print('Yang keprint kondisi terakhir')
             if taggar == 'komputer_ti':
-                karir = 'https://www.karir.com/search?q=&sort_order=newest&industry_ids=-6&context=welcome_main_favorite_industry_item'
+                karir = 'https://www.karir.com/search?q=&sort_order=newest&job_function_ids=-91-94-47-92-46-93-45&industry_ids=-6&context=welcome_main_favorite_industry_item'
                 page = get(f"{karir}", headers={
                     "User-Agent": "Mozilla/5.0"}).content
             elif taggar == 'manufaktur':
@@ -78,7 +84,7 @@ def data_lowongan_karir(kata_kunci, taggar):
                 # Tidak ada error
                 # Mencari Informasi Perusahaan
                 # print(response.text)
-        print("Karir:", karir)
+
         print('Kata kunci: '+kata_kunci)
         if taggar is not None:
             print('Taggar: '+taggar)

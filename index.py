@@ -35,7 +35,11 @@ def search():
     
     keyword = request.args.get("keyword")
     taggar = request.args.get("taggar")
-    
+    if taggar is not None and taggar != '':
+        # Mengganti karakter '%2F' dengan '_'
+        taggar = taggar.replace("/", "_")
+        taggar = taggar.lower()
+
     if taggar is None: taggar = ''
     if keyword is None: keyword = ''
     
@@ -43,22 +47,22 @@ def search():
     new_jobs = get_new_jobs(keyword, taggar)
     jobs_to_insert = []
     for job in new_jobs:
-        jobs_to_insert.append({
-            'nama_loker': job['lowongan_pekerjaan'],
-            'perusahaan': job['perusahaan_lokasi'],
-            'deskripsi': job['job_desk'],
-            'logo_perusahaan': None,
-            'kategori': taggar,
-            'gaji': job['gaji'],
-            'tanggal': job['tanggal_terbit'] if job['tanggal_terbit'] != '' else datetime.now().strftime("%Y-%m-%d"),
-            'source': job['sumber_situs'],
-            'status': 'BARU',
-            'created_by': 0
-        })
-    
+        if job['lowongan_pekerjaan'] is not None and job['lowongan_pekerjaan'] != '':
+            jobs_to_insert.append({
+                'nama_loker': job['lowongan_pekerjaan'],
+                'perusahaan': job['perusahaan_lokasi'],
+                'deskripsi': job['job_desk'],
+                'logo_perusahaan': None,
+                'kategori': taggar,
+                'gaji': job['gaji'],
+                'tanggal': job['tanggal_terbit'] if job['tanggal_terbit'] != '' else datetime.now().strftime("%Y-%m-%d"),
+                'source': job['sumber_situs'],
+                'status': 'BARU',
+                'created_by': 0
+            })
+
     builder = QueryBuilder()
     builder.insert('sk_loker', pd.DataFrame(jobs_to_insert))
-    
     # start harmony search
     solution = harmony_search(taggar, keyword)
 

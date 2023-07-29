@@ -1,11 +1,15 @@
+from requests import get
 from urllib import request
 import bs4 as bs
+import lxml
+import re
 from datetime import datetime
 
 
 def data_lowongan_jobsid(kata_kunci, taggar):
     try:
         if kata_kunci != '' and taggar=="":
+            print('Yang keprint kondisi pertama')
             yang_dicari = kata_kunci
             jobs_id = "https://www.jobs.id/lowongan-kerja?kata-kunci="
             page = request.urlopen(f"{jobs_id}{yang_dicari}")
@@ -56,7 +60,17 @@ def data_lowongan_jobsid(kata_kunci, taggar):
                 jobs_id = 'https://www.jobs.id/lowongan-kerja-bidang-ritel'
                 page = request.urlopen(f"{jobs_id}")
 
-        print("Jobs id:", jobs_id)
+                # response = get(f"{glints}{yang_dicari}", headers={
+                # "User-Agent": "Mozilla/5.0"})
+                # Cek Status Respon
+                # if response.status_code != 200:
+                #     # Error
+                #     print("Tidak dapat mencari situs")
+
+                # else:
+                # Tidak ada error
+                # Mencari Informasi Perusahaan
+                # print(response.text)
         print(page)
         print('Kata kunci: '+kata_kunci)
         if taggar is not None:
