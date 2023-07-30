@@ -1,6 +1,10 @@
 # Pencarian Lowongan Pekerjaan dengan Harmony Search
 
-Aplikasi ini dibangun dengan `python 3.10.12` dan semua library yang digunakan bisa dilihat di `requirements.txt`.
+Aplikasi ini dibangun dengan `python 3.10.12` dan semua library yang digunakan bisa dilihat di `requirements.txt`. Pertama copy file env example dan rename
+
+```bash
+cp .flaskenv.example .flaskenv
+```
 
 Sebelum menjalankan aplikasinya, hal pertama yang perlu dilakukan adalah mengatur environment variabel `.flaskenv`. Yang perlu diatur adalah databasenya. Selain itu, di repo ini disediakan data dummya pada folder ` data``. Jika databasenya sudah ada bisa import  `dummy_sk_loker.csv`ke tabel`sk_loker`. Jika belum ada maka disediakan juga dump database di file `dummy_data.sql`
 
