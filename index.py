@@ -30,7 +30,7 @@ def find():
     if keyword is None:
         keyword = ''
     return harmony_search(taggar, keyword)
-
+    
 @app.route("/search")
 def search():
     """
@@ -69,8 +69,7 @@ def search():
         })
 
     builder = QueryBuilder()
-    builder.insert('sk_loker', pd.DataFrame(jobs_to_insert))
-    
+    builder.insert_if_not_exist('sk_loker', pd.DataFrame(jobs_to_insert))
     # start harmony search
     solution = harmony_search(taggar, keyword)
 
