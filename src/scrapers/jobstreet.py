@@ -7,13 +7,14 @@ import unicodedata
 
 def data_lowongan_jobstreet(kata_kunci, taggar):
     if taggar is not None :
-        job_name = kata_kunci
+        job_name = taggar
     else :
         job_name = kata_kunci
     allData = []
     baseUrl = "https://www.jobstreet.co.id"
     for x in range(5): 
         x = x+1
+        print(f"Ambil data jobstreet ke - {x}")
         html_text = requests.get(f"{baseUrl}/id/{job_name}-jobs?pg={x}").text
         web_html = BeautifulSoup(html_text, "lxml")
         

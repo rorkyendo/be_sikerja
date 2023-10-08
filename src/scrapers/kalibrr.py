@@ -7,13 +7,14 @@ import unicodedata
 
 def data_lowongan_kalibrr(kata_kunci, taggar):
     if taggar is not None :
-        job_name = kata_kunci
+        job_name = taggar
     else :
         job_name = kata_kunci
     allData = []
     baseUrl = "https://www.kalibrr.com/"
     for x in range(5):
         x = x + 1
+        print(f"Ambil data kalibrr ke - {x}")
         html_text = requests.get(f"{baseUrl}id-ID/job-board/te/{job_name}/{x}").text
         web_html = BeautifulSoup(html_text, "lxml")
         

@@ -9,6 +9,7 @@ import re
 import unicodedata
 from bs4 import BeautifulSoup
 import requests
+from unidecode import unidecode
 
 template_dir = os.path.abspath('views')
 app = Flask("Lowongan Pekerjaan", template_folder=template_dir)
@@ -78,6 +79,38 @@ def search():
         taggar=taggar,
         jobs=solution
     )
+
+@app.route("/getData")
+def getData():
+    keyword = request.args.get("keyword")
+    taggar = request.args.get("taggar")
+    if taggar is None:
+        taggar = ''
+    if keyword is None:
+        keyword = ''
+    # start scraping
+    new_jobs = get_new_jobs(keyword, taggar)
+    
+    jobs_to_insert = []
+    for job in new_jobs:
+        if job['lowongan_pekerjaan'] is not None :
+            jobs_to_insert.append({
+                'nama_loker' : unidecode(job['lowongan_pekerjaan']),
+                'perusahaan' : unidecode(job['perusahaan_lokasi']),
+                'deskripsi' : unidecode(job['job_desk']),
+                'logo_perusahaan': job['logo'],
+                'kategori': taggar,
+                'gaji': job['gaji'],
+                'tanggal': job['tanggal_terbit'] if job['tanggal_terbit'] != '' else datetime.now().strftime("%Y-%m-%d"),
+                'source': job['detail_situs'],
+                'status': 'BARU',
+                'created_by': 0
+            })
+
+        builder = QueryBuilder()
+        builder.insert_if_not_exist('sk_loker', pd.DataFrame(jobs_to_insert))
+
+    return "success"
 
 @app.route("/testScrape")
 def scrape():
