@@ -12,7 +12,11 @@ def data_lowongan_karir(kata_kunci, taggar):
         job_name = kata_kunci
     allData = []
     baseUrl = "https://www.karir.com"
-    for x in range(5):
+    y = 5
+    if job_name.lower() == "manufaktur":
+        y = 1
+
+    for x in range(y):
         x = x+1
         print(f"Ambil data karir ke - {x}")
         html_text = requests.get(f"{baseUrl}/search?q={job_name}&page={x}").text

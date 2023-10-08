@@ -12,7 +12,11 @@ def data_lowongan_jobstreet(kata_kunci, taggar):
         job_name = kata_kunci
     allData = []
     baseUrl = "https://www.jobstreet.co.id"
-    for x in range(5): 
+    y = 5
+    if job_name.lower() == "manufaktur":
+        y = 1
+
+    for x in range(y):
         x = x+1
         print(f"Ambil data jobstreet ke - {x}")
         html_text = requests.get(f"{baseUrl}/id/{job_name}-jobs?pg={x}").text
@@ -20,7 +24,6 @@ def data_lowongan_jobstreet(kata_kunci, taggar):
         
         # Find all job listings
         kerjaan = web_html.find_all("div", attrs={'class': 'z1s6m00', 'data-automation': 'jobListing'})
-        
         # Initialize empty lists to store job details
         job_titles = []
         company_names = []

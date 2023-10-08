@@ -12,12 +12,16 @@ def data_lowongan_kalibrr(kata_kunci, taggar):
         job_name = kata_kunci
     allData = []
     baseUrl = "https://www.kalibrr.com/"
-    for x in range(5):
+    y = 5
+    if job_name.lower() == "manufaktur":
+        y = 1
+
+    for x in range(y):
         x = x + 1
         print(f"Ambil data kalibrr ke - {x}")
         html_text = requests.get(f"{baseUrl}id-ID/job-board/te/{job_name}/{x}").text
         web_html = BeautifulSoup(html_text, "lxml")
-        
+            
         # Find all job listings
         kerjaan = web_html.find_all("main")
 
@@ -98,8 +102,8 @@ def data_lowongan_kalibrr(kata_kunci, taggar):
 
             if i < len(created) and created[i] is not None:
                 created_text = created[i]
-                match = re.search(r"Posted (\d+) (day|days|month|months) ago", created_text)
-                match2 = re.search(r"Posted a (day|days|month|months) ago", created_text)
+                match = re.search(r"Posted (\d+) (days|months) ago", created_text)
+                match2 = re.search(r"Posted a (day|month) ago", created_text)
                 if match:
                     amount = int(match.group(1))
                     unit = match.group(2)

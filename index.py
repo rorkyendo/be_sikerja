@@ -284,14 +284,17 @@ def scrape2():
 
 @app.route("/testScrape3")
 def scrape3():
-    job_name = "programmer"
+    job_name = "Manufaktur"
     allData = []
     baseUrl = "https://www.kalibrr.com"
-    for x in range(5):
-        x = x+1
+    y = 5
+    if job_name.lower() == "manufaktur":
+        y = 1
+
+    for x in range(y):
+        x = x + 1
         html_text = requests.get(f"{baseUrl}/job-board/te/{job_name}/{x}").text
         web_html = BeautifulSoup(html_text, "html.parser")
-        print(f"{baseUrl}/job-board/te/{job_name}/{x}")
         # Find all job listings
         kerjaan = web_html.find_all("main")
         # Initialize empty lists to store job details
@@ -361,8 +364,8 @@ def scrape3():
 
             if i < len(created) and created[i] is not None:
                 created_text = created[i]
-                match = re.search(r"Posted (\d+) (day|days|month|months) ago", created_text)
-                match2 = re.search(r"Posted a (day|days|month|months) ago", created_text)
+                match = re.search(r"Posted (\d+) (days|months) ago", created_text)
+                match2 = re.search(r"Posted a (day|month) ago", created_text)
                 if match:
                     amount = int(match.group(1))
                     unit = match.group(2)
@@ -381,6 +384,7 @@ def scrape3():
 
                     job_info['tanggal_terbit'] = formatted_created_date  # Mengganti created dengan tanggal yang sudah diubah
                 elif match2:
+                    unit = match2.group(1)
                     if unit == "month":
                         # Menganggap satu bulan = 30 hari
                         delta = timedelta(days=30)
