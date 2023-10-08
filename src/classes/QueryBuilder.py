@@ -35,12 +35,21 @@ class QueryBuilder():
     def insert_if_not_exist(self, table_name: str, data: pd.DataFrame):
         data = data.to_dict(orient='records')
         need_to_insert = []
-        
+
         for d in data:
-            data_in_db = self.select_where_dict(table_name, d)
-            if data_in_db.shape[0] == 0:
+            # Check for duplicates based on 'nama_loker' and 'perusahaan' columns
+            duplicate_condition = {
+                'nama_loker': d['nama_loker'],
+                'perusahaan': d['perusahaan']
+            }
+
+            # Fetch existing data from the database based on the duplicate_condition
+            data_in_db = self.select_where_dict(table_name, duplicate_condition)
+
+            # If no matching records found, add the data to need_to_insert list
+            if data_in_db.empty:
                 need_to_insert.append(d)
-                
+
         if len(need_to_insert) > 0:
             self.insert(table_name, pd.DataFrame(need_to_insert))
 

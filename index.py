@@ -31,6 +31,7 @@ def find():
         taggar = ''
     if keyword is None:
         keyword = ''
+    print("Fungsi harmony berjalan")
     return harmony_search(taggar, keyword)
     
 @app.route("/search")

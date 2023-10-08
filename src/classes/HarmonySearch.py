@@ -53,7 +53,7 @@ class HarmonySearch():
         selected_score = ['score_tanggal', 'score_nama_loker_keyword', 'score_perusahaan_keyword', 'score_kategori_taggar']
 
         data['score'] = (data['score_tanggal'] * 0.1) + (data['score_nama_loker_keyword'] * 0.3) + ( data['score_perusahaan_keyword'] * 0.3) + (data['score_kategori_taggar'] * 0.3)
-
+        # print("socre",data['score'])
         self.__data = data
 
     def __init_harmony_memory(self) -> list:
