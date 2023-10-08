@@ -1,106 +1,107 @@
-from requests import get
-import bs4 as bs
-from datetime import datetime
-import json
-
+from flask import Flask, render_template, request, jsonify
+from bs4 import BeautifulSoup
+import requests
+from datetime import datetime, timedelta
+import re
+import unicodedata
 
 def data_lowongan_karir(kata_kunci, taggar):
-    try:
-        taggar_map = {
-            'komputer_ti': '-91-94-47-92-46-93-45',
-            'manufaktur': '-44',
-            'keuangan': '-11',
-            'telekomunikasi': '-33',
-            'ritel': '29'
-        }
+    if taggar is not None :
+        job_name = kata_kunci
+    else :
+        job_name = kata_kunci
+    allData = []
+    baseUrl = "https://www.karir.com"
+    for x in range(5):
+        x = x+1
+        html_text = requests.get(f"{baseUrl}/search?q={job_name}&page={x}").text
+        web_html = BeautifulSoup(html_text, "lxml")
+        
+        # Find all job listings
+        kerjaan = web_html.find_all("section")
 
-        karir_base = 'https://www.karir.com/search?q='
+        # Initialize empty lists to store job details
+        job_titles = []
+        company_names = []
+        locations = []
+        detail_situs = []
+        gaji = []
+        created = []
+        logo = []
+        
+        # Iterate through each job listing
+        for job in kerjaan:
+            h1_tags = job.find_all("h4",attrs={'class':'tdd-function-name'})
+            job_title = [h1.text.strip() for h1 in h1_tags]
+            company_name = job.find_all("div", attrs={'class': 'tdd-company-name'})
+            company = [company.text.strip() for company in company_name]
+            logos = job.find_all("img", attrs={'alt': 'logo'})
+            logo = [logo.get("src") for logo in logos]
+            detail_situs_name = job.find_all("a", attrs={'class': '--blue'})
+            detail_situs = [detail_situs.get("href") for detail_situs in detail_situs_name]
+            rangeGaji = job.find_all("span", attrs={'class': 'tdd-salary'})
+            gaji = [gaji.text.strip() for gaji in rangeGaji]
+            location_name = job.find_all("span", attrs={'class': 'tdd-location'})
+            location = [location.text.strip() for location in location_name]
+            created_time = job.find_all("time")
+            created = [created.get('datetime') for created in created_time]
 
-        if kata_kunci != '' and taggar == "":
-            print('Yang keprint kondisi pertama')
-            karir = f"{karir_base}{kata_kunci}"
-            page = get(karir, headers={"User-Agent": "Mozilla/5.0"}).content
-        elif kata_kunci != '' and taggar is not None:
-            print('Yang keprint kondisi kedua')
-            taggar_path = taggar_map.get(taggar, '')
-            karir = f"{karir_base}{kata_kunci}&sort_order=newest&job_function_ids={taggar_path}&context=welcome_main_favorite_industry_item"
-            page = get(karir, headers={"User-Agent": "Mozilla/5.0"}).content
-        elif kata_kunci == '' and taggar is not None:
-            print("tag:")
-            print(taggar)
-            print('Yang keprint kondisi terakhir')
-            taggar_path = taggar_map.get(taggar, '')
-            karir = f"{karir_base}&sort_order=newest&industry_ids={taggar_path}&context=welcome_main_favorite_industry_item"
-            page = get(karir, headers={"User-Agent": "Mozilla/5.0"}).content
+            # Append job details to respective lists
+            job_titles.extend(job_title)
+            company_names.extend(company)
+            logo.extend(logo)
+            locations.extend(location)
+            created.extend(created)
+            detail_situs.extend(detail_situs)
+            gaji.extend(gaji)
 
-        print('Kata kunci: ' + kata_kunci)
-        if taggar is not None:
-            print('Taggar: ' + taggar)
+        for i in range(len(job_titles)):
+            job_info = {}
 
-        results = []
-        soup = bs.BeautifulSoup(page, 'html.parser')
+            if i < len(gaji) and gaji[i] is not None:
+                job_info['gaji'] = gaji[i]
+            else:
+                job_info['gaji'] = "-"
 
-        div_table_fix = soup.find('ul', {'class': 'opportunities'})
+            job_info['job_desk'] = '-'
+            job_info['sumber_situs'] = baseUrl
 
-        data_array = []
-        for semua_data in div_table_fix.findAll('li', {'class': 'columns opportunity'}):
-            detail_array = []
-            lowongan_pekerjaan = semua_data.find('h4', {'class': 'tdd-function-name --semi-bold --inherit'})
-            link = 'Karir'
-            detail_situs = semua_data.find('a', {'class': '--blue'})['href']
-            perusahaan = semua_data.find('div', 'tdd-company-name h8 --semi-bold')
-            waktu_publikasi = semua_data.find('time', '--h8')
-            job_desk = semua_data.find('span', 'tdd-company')
-            lokasi = semua_data.find('span', 'tdd-location')
-            gaji = semua_data.find('span', 'tdd-salary')
-            pengalaman = semua_data.find('span', 'tdd-experience')
+            if i < len(logo) and logo[i] is not None:
+                job_info['logo'] = logo[i]
+            else:
+                job_info['logo'] = "-"
 
-            detail_array.append(lowongan_pekerjaan.get_text().strip())
-            detail_array.append(link)
-            detail_array.append('https://www.karir.com' + detail_situs)
-            detail_array.append(perusahaan.get_text().strip())
-            detail_array.append(waktu_publikasi.get_text().strip())
-            detail_array.append(job_desk.get_text().strip())
-            detail_array.append(lokasi.get_text().strip())
-            detail_array.append(gaji.get_text().strip())
-            detail_array.append(pengalaman.get_text().strip())
+            if i < len(detail_situs) and detail_situs[i] is not None:
+                job_info['detail_situs'] = baseUrl+detail_situs[i]
+            else:
+                job_info['detail_situs'] = "-"
+            
+            if i < len(job_titles) and job_titles[i] is not None:
+                job_info['lowongan_pekerjaan'] = job_titles[i]
+            else:
+                job_info['lowongan_pekerjaan'] = "-"
 
-            data_array.append(detail_array)
+            if i < len(company_names) and company_names[i] is not None:
+                job_info['perusahaan_lokasi'] = company_names[i]
+            else:
+                job_info['perusahaan_lokasi'] = "-"
 
-            detail_halaman_situs = detail_array[2]
-            page_detail_halaman_situs = get(detail_halaman_situs, headers={"User-Agent": "Mozilla/5.0"})
-            page_detail_halaman_situs = page_detail_halaman_situs.content
-            soup_detail_halaman_situs = bs.BeautifulSoup(page_detail_halaman_situs, 'html.parser')
-            ambil_data_javascript = soup_detail_halaman_situs.find('script', {'type': 'application/ld+json'}).text
-            data_json_detail = json.loads(ambil_data_javascript, strict=False)
-            waktu_terbit = datetime.strptime(data_json_detail['datePosted'], "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%Y-%m-%d")
+            if i < len(locations) and locations[i] is not None:
+                job_info['lokasi'] = locations[i]
+            else:
+                job_info['lokasi'] = "-"
 
-            # Menyimpan data website ke pustaka sementara
-            job_data = {
-                'detail_situs': detail_array[2],
-                'perusahaan_lokasi': detail_array[3] + ', ' + detail_array[6],
-                'gaji': detail_array[7],
-                'lowongan_pekerjaan': detail_array[0],
-                'sumber_situs': link,
-                'tanggal_terbit': waktu_terbit,
-                'job_desk': 'Pengalaman ' + detail_array[8]
-            }
+            if i < len(created) and created[i] is not None:
+                # Parsing tanggal dalam format ISO 8601 dengan timezone offset
+                tanggal_terbit_datetime = datetime.strptime(created[i], "%Y-%m-%dT%H:%M:%S.%f%z")
 
-            results.append(job_data)
+                # Memformat tanggal ke format "Y-m-d"
+                tanggal_terbit_format_baru = tanggal_terbit_datetime.strftime("%Y-%m-%d")
+                job_info['tanggal_terbit'] = tanggal_terbit_format_baru 
+            else:
+                job_info['tanggal_terbit'] = "-"
 
-        return results
-    except:
-        return [{
-            'detail_situs': "",
-            'perusahaan_lokasi': "",
-            'gaji': "",
-            'lowongan_pekerjaan': "",
-            'sumber_situs': "",
-            'tanggal_terbit': "",
-            'job_desk': ""
-        }]
+            if job_info['detail_situs'] != "-" :            
+                allData.append(job_info)
 
-
-# Example usage:
-# if __name__ == "__main__":
-#     data_lowongan_karir('marketing', 'komputer_ti')
+    return allData

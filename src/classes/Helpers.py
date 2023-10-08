@@ -1,5 +1,5 @@
+import jellyfish
 from datetime import datetime
-import jaro
 
 class Helpers():
     @staticmethod
@@ -10,4 +10,4 @@ class Helpers():
 
     @staticmethod
     def similarity_score(word1, word2):
-        return jaro.jaro_winkler(word1, word2)
+        return jellyfish.jaro_winkler(word1, word2)
