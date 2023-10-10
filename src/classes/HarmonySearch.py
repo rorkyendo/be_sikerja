@@ -4,6 +4,7 @@ from .Helpers import Helpers
 import random
 from sklearn.preprocessing import MinMaxScaler
 from .QueryBuilder import QueryBuilder
+import time
 
 
 class HarmonySearch():
@@ -158,6 +159,7 @@ class HarmonySearch():
     
 def harmony_search(taggar: str, keyword: str):
     #  start harmony search
+    start_time = time.time()  # Catat waktu mulai eksekusi
     builder = QueryBuilder()
     sk_loker = builder.raw_query("SELECT * FROM sk_loker")
     sk_loker['tanggal'] = sk_loker['tanggal'].astype(str)
@@ -176,4 +178,8 @@ def harmony_search(taggar: str, keyword: str):
         max_iter=100
     )
     
+    end_time = time.time()  # Catat waktu selesai eksekusi
+    elapsed_time = end_time - start_time  # Hitung selisih waktu
+
+    print(f"Elapsed Time: {elapsed_time} seconds")  # Cetak waktu eksekusi
     return solution.to_dict(orient='records')
