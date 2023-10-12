@@ -51,10 +51,8 @@ class HarmonySearch():
         data['score_perusahaan_keyword'] = data['perusahaan'].apply(lambda w: Helpers.similarity_score(w, keyword))
         data['score_kategori_taggar'] = data['kategori'].apply(lambda w: Helpers.similarity_score(w, taggar))
 
-        selected_score = ['score_tanggal', 'score_nama_loker_keyword', 'score_perusahaan_keyword', 'score_kategori_taggar']
-
         data['score'] = (data['score_tanggal'] * 0.1) + (data['score_nama_loker_keyword'] * 0.3) + ( data['score_perusahaan_keyword'] * 0.3) + (data['score_kategori_taggar'] * 0.3)
-        # print("socre",data['score'])
+        
         self.__data = data
 
     def __init_harmony_memory(self) -> list:
@@ -126,7 +124,7 @@ class HarmonySearch():
 
         ordered_hm = [t['solution'] for t in temp]
 
-        return np.array(ordered_hm), temp[-1]['solution'], temp[-1]['score']
+        return np.array(ordered_hm), temp[-1]['solution'], temp[-1]['score'], temp[0]['solution'], temp[0]['score']
 
     def __get_solution_data(self, solution):
         selected_solution = self.__data[self.__data.id_data.isin(solution)][['id_data', 'score']]
@@ -146,16 +144,20 @@ class HarmonySearch():
 
         for i in range(max_iter):
             new_solution = self.__get_new_solution(harmony_memory)
-            harmony_memory, worst_solution, worst_solution_score = self.__order_harmony_memory_best_to_worst(harmony_memory)
+            harmony_memory, worst_solution, worst_solution_score, best_solution, best_solution_score = self.__order_harmony_memory_best_to_worst(harmony_memory)
             new_solution_score = self.__evaluate_solution(new_solution)
 
-            # jika solusi yang baru
+            print(f"Best Iterasi ke-{i+1}: {np.round(best_solution_score, 3)}.", "Dengan data:", self.__get_solution_data(best_solution).to_dict(orient='records'), "\n")
+
+            # jika solusi yang baru lebih baik dari solusi yang terburuk
             if new_solution_score > worst_solution_score:
                 harmony_memory[-1] = new_solution
 
-        best_solution = harmony_memory[0]
+        last_best_solution = harmony_memory[0]
 
-        return self.__get_solution_data(best_solution)
+        print(f"Hasil terakhir: {np.round(best_solution_score, 3)}.", "Dengan data:", self.__get_solution_data(last_best_solution).to_dict(orient='records'), "\n")
+
+        return self.__get_solution_data(last_best_solution)
     
 def harmony_search(taggar: str, keyword: str):
     #  start harmony search
