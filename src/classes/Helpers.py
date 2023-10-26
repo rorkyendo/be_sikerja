@@ -10,4 +10,4 @@ class Helpers():
 
     @staticmethod
     def similarity_score(word1, word2):
-        return jellyfish.jaro_winkler(word1, word2)
+        return jellyfish.jaro_winkler_similarity(word1, word2)
